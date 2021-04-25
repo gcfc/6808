@@ -15,10 +15,11 @@ from demo import run_demo
 
 ## INSTRUCTIONS
 
-# All comments elsewhere besides this file must NOT be deleted without every team member's approval
-# Lines of code that are added by TEAM 1 in other files MUST be marked with "#TEAM" at the end of the line
-# For any other function that you will define and use in main(), please implement in modules/utils.py and import the function here
+# (1) Please download Daniil-Osokin's checkpoint_iter_370000.pth and add it under models folder
 
+# (2) All comments elsewhere besides this file must NOT be deleted without every team member's approval
+# (3) Lines of code that are added by TEAM 1 in other files MUST be marked with "#TEAM" at the end of the line
+# (4) For any other function that you will define and use in main(), please implement in modules/utils.py and import the function here
 
 ## HOW TO START PROGRAM
 
