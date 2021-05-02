@@ -4,12 +4,17 @@ import cv2
 import numpy as np
 import torch
 import time
+import os
 import matplotlib.pyplot as plt
 
 from pose.models.with_mobilenet import PoseEstimationWithMobileNet
 from pose.modules.load_state import load_state
 from pose.modules.utils import Graph
 from pose.demo import run_demo
+
+from depth.networks.resnet_encoder import ResnetEncoder
+from depth.networks.depth_decoder import DepthDecoder
+from depth.test_simple import run_depth
 
 ### NOTES FOR TEAM 1 ###
 
@@ -70,6 +75,7 @@ def main():
             img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
         frame_provider = [img]
         points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
+        depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
 
         # TODO invoke utility functions to calculate final body pose points
 
@@ -78,6 +84,7 @@ def main():
         # graph.plot()
         # graph.show()
         time.sleep(delay)
+        break
 
 
 # DO NOT EDIT THE FOLLOWING CODE, EDIT ONLY IN main()
@@ -115,9 +122,44 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # initializing pose model
     net = PoseEstimationWithMobileNet()
     checkpoint = torch.load(args.checkpoint_path, map_location='cpu')
     load_state(net, checkpoint)
+
+    # initializing depth model
+    if torch.cuda.is_available() and not args.no_cuda:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
+    model_path = "./depth/models/mono+stereo_640x192"
+    # print("-> Loading model from ", model_path)
+    encoder_path = model_path + "/encoder.pth"
+    depth_decoder_path = model_path + "/depth.pth"
+
+    # LOADING PRETRAINED MODEL
+    # print("   Loading pretrained encoder")
+    encoder = ResnetEncoder(18, False)
+    loaded_dict_enc = torch.load(encoder_path, map_location=device)
+
+    # extract the height and width of image that this model was trained with
+    feed_height = loaded_dict_enc['height']
+    feed_width = loaded_dict_enc['width']
+    filtered_dict_enc = {k: v for k, v in loaded_dict_enc.items() if k in encoder.state_dict()}
+    encoder.load_state_dict(filtered_dict_enc)
+    encoder.to(device)
+    encoder.eval()
+
+    # print("   Loading pretrained decoder")
+    depth_decoder = DepthDecoder(
+        num_ch_enc=encoder.num_ch_enc, scales=range(4))
+
+    loaded_dict = torch.load(depth_decoder_path, map_location=device)
+    depth_decoder.load_state_dict(loaded_dict)
+
+    depth_decoder.to(device)
+    depth_decoder.eval()
 
     main()
 
