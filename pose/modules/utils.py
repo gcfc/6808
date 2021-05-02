@@ -1,8 +1,10 @@
 # TEAM 1 utils.py
-import random
-import numpy as np
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import matplotlib.style as style
+import random
+import numpy as np
 
 style.use("ggplot")
 body_parts = ['nose', 'neck',
@@ -17,9 +19,10 @@ class Graph():
         self.ax = ax
         # delay: in seconds
         self.delay = delay
-        # coords should be a list of length 3 lists
-        # each sublist should correspond to the correct body part
-        self.x, self.y, self.z = self.update_coords(coords)
+        # check if a body part point is missing or not
+        self.availability = {}
+        # coords should be a dictionary of length 3 lists/tuples
+        # each list/tuple should correspond to the correct body part
         self.id_p = {
             body_parts[i]: i for i in range(len(body_parts))
         }
@@ -48,23 +51,28 @@ class Graph():
         self.trace("l_hip", "l_knee")
         self.trace("l_knee", "l_ank")
 
+    # coords is a dictionary pointing body_part_id to (x,y,z)
     def update_coords(self, coords):
-        x, y, z = [], [], []
-        if len(coords) == 0:
-            return x,y,z
-        if len(coords[0]) != 3:
-            print("Coords must be length 3")
-            return x,y,z
-        coords = list(zip(*coords))
-        x = np.array(coords[0], dtype=np.float)
-        y = np.array(coords[1], dtype=np.float)
-        z = np.array(coords[2], dtype=np.float)
-        return x,y,z
+        lists = []
+        for i in range(len(body_parts)):
+            if i not in coords:
+                lists.append([0, 0, 0])
+                self.availability[i] = False
+            else:
+                lists.append(coords[i])
+                self.availability[i] = True
+        lists = list(zip(*lists))
+        self.x = np.array(lists[0], dtype=np.float)
+        self.y = np.array(lists[1], dtype=np.float)
+        self.z = np.array(lists[2], dtype=np.float)
 
     def trace(self, part1, part2):
-        self.ax.plot3D([self.x[self.id_p[part1]], self.x[self.id_p[part2]],
-                self.y[self.id_p[part1]], self.y[self.id_p[part2]],
-                self.z[self.id_p[part1]], self.z[self.id_p[part2]]])
+        if not self.availability[self.id_p[part1]] or not self.availability[self.id_p[part2]]:
+            return
+
+        self.ax.plot3D([self.x[self.id_p[part1]], self.x[self.id_p[part2]]],
+                [self.y[self.id_p[part1]], self.y[self.id_p[part2]]],
+                [self.z[self.id_p[part1]], self.z[self.id_p[part2]]], 'b')
 
     def show(self):
         plt.show(block=False)

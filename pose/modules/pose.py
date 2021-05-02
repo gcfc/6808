@@ -54,7 +54,7 @@ class Pose:
             if global_kpt_a_id != -1:
                 x_a, y_a = self.keypoints[kpt_a_id]
                 # (x_a, y_a) coordinates of image. ignore everything else since we are not drawing here
-                points[kpt_a_id] = (x_a, y_a) #TEAM
+                points[kpt_a_id] = (x_a, y_a, 0) #TEAM
                 # cv2.circle(img, (int(x_a), int(y_a)), 3, Pose.color, -1)
             # kpt_b_id = BODY_PARTS_KPT_IDS[part_id][1]
             # global_kpt_b_id = self.keypoints[kpt_b_id, 0]

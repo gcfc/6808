@@ -5,7 +5,11 @@ import numpy as np
 import torch
 import time
 import os
+import tkinter
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+import requests # tmp to get img from webcam
 
 from pose.models.with_mobilenet import PoseEstimationWithMobileNet
 from pose.modules.load_state import load_state
@@ -47,7 +51,6 @@ from depth.test_simple import run_depth
 #                 'r_ear', 'l_ear']
 
 def main():
-    # graph is also delayed by the same value, so 2*delay is the actual delay time. why twice: must delay graph or else pyplot freezes
     delay = 0.001
 
     # variable for video camera
@@ -61,30 +64,45 @@ def main():
 
     while True:
         # TODO get data from IMUs
-
         # pass webcam pic into analyzer to get body pose points
-        if args.video != '':
-            if cam is None:
-                cam = cv2.VideoCapture(args.video)
-            was_read, img = cam.read()
-            if not was_read or not cam.isOpened():
-                print("Camera is either closed or missing.")
-                break
-        else:
-            # only analyze first image of given list of images
-            img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
-        frame_provider = [img]
-        points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
-        depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
+
+        # local cam
+        # if args.video != '':
+        #     if cam is None:
+        #         cam = cv2.VideoCapture(args.video)
+        #     was_read, img = cam.read()
+        #     if not was_read or not cam.isOpened():
+        #         print("Camera is either closed or missing.")
+        #         break
+        # else:
+        #     # only analyze first image of given list of images
+        #     img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
+
+        # online webcam
+        # r = requests.get("http:///shot.jpg")
+        # img_arr = np.array(bytearray(r.content), dtype=np.uint8)
+        # img = cv2.imdecode(img_arr, -1)
 
         # TODO invoke utility functions to calculate final body pose points
+        # frame_provider = [img]
+        # points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
+        # depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
 
-        # plot calculated points on animated 3D graph
+        # plot calculated points on animated 3D graph TODO make matplotlib pop up
         # graph.update_coords(coords)
         # graph.plot()
         # graph.show()
-        time.sleep(delay)
-        break
+
+        # BELOW ARE ALL TEST code to display 3d graph
+        # fig.canvas.draw()
+
+        # plt_img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+        # plt_img = plt_img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
+        # plt_img = cv2.cvtColor(plt_img, cv2.COLOR_RGB2BGR)
+
+        # cv2.imshow("plot", plt_img)
+        # k = cv2.waitKey(0)
 
 
 # DO NOT EDIT THE FOLLOWING CODE, EDIT ONLY IN main()
