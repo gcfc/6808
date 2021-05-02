@@ -4,12 +4,12 @@ import cv2
 import numpy as np
 import torch
 import time
-
-from models.with_mobilenet import PoseEstimationWithMobileNet
-from modules.load_state import load_state
-from modules.utils import Graph
 import matplotlib.pyplot as plt
-from demo import run_demo
+
+from pose.models.with_mobilenet import PoseEstimationWithMobileNet
+from pose.modules.load_state import load_state
+from pose.modules.utils import Graph
+from pose.demo import run_demo
 
 ### NOTES FOR TEAM 1 ###
 
