@@ -5,11 +5,11 @@ import numpy as np
 import torch
 import time
 
-from models.with_mobilenet import PoseEstimationWithMobileNet
-from modules.keypoints import extract_keypoints, group_keypoints
-from modules.load_state import load_state
-from modules.pose import Pose, track_poses
-from val import normalize, pad_width
+from .models.with_mobilenet import PoseEstimationWithMobileNet
+from .modules.keypoints import extract_keypoints, group_keypoints
+from .modules.load_state import load_state
+from .modules.pose import Pose, track_poses
+from .val import normalize, pad_width
 
 
 class ImageReader(object):

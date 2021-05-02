@@ -25,11 +25,11 @@ from pose.demo import run_demo
 
 # If you would like to test with VIDEO:
 # python main.py --checkpoint-path <path_to>/checkpoint_iter_370000.pth --video 0
-# example: python main.py --checkpoint-path ./models/checkpoint_iter_370000.pth --video 0
+# example: python main.py --checkpoint-path ./pose/models/checkpoint_iter_370000.pth --video 0
 
 # If you would like to test with IMAGES:
 # python main.py --checkpoint-path <path_to>/checkpoint_iter_370000.pth --images <path_to_image>
-# example: python main.py --checkpoint-path ./models/checkpoint_iter_370000.pth --images images/test_img.jpg
+# example: python main.py --checkpoint-path ./pose/models/checkpoint_iter_370000.pth --images images/test_img.jpg
 
 
 ## REFERENCE
@@ -42,13 +42,13 @@ from pose.demo import run_demo
 #                 'r_ear', 'l_ear']
 
 def main():
-    #graph is also delayed by the same value, so 2*delay is the actual delay time. why twice: must delay graph or else pyplot freezes
+    # graph is also delayed by the same value, so 2*delay is the actual delay time. why twice: must delay graph or else pyplot freezes
     delay = 0.001
 
     # variable for video camera
     cam = None
 
-    #initializing graph
+    # initializing graph
     fig = plt.figure()
     map_ax = fig.add_subplot(111, projection="3d")
     map_ax.autoscale(enable=True, axis='both', tight=True)
@@ -77,7 +77,6 @@ def main():
         # graph.update_coords(coords)
         # graph.plot()
         # graph.show()
-
         time.sleep(delay)
 
 
@@ -85,6 +84,8 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''Team 1 Body Pose Tracking with IMUs''')
+
+    # parser for pose
     parser.add_argument('--checkpoint-path', type=str, required=True, help='path to the checkpoint')
     parser.add_argument('--height-size', type=int, default=256, help='network input layer height size')
     parser.add_argument('--video', type=str, default='', help='path to video file or camera id')
@@ -92,6 +93,26 @@ if __name__ == '__main__':
     parser.add_argument('--cpu', action='store_true', help='run network inference on cpu')
     parser.add_argument('--track', type=int, default=1, help='track pose id in video')
     parser.add_argument('--smooth', type=int, default=1, help='smooth pose keypoints')
+
+    # parser for depth
+    parser.add_argument('--model_name', type=str,
+                        help='name of a pretrained model to use',
+                        choices=[
+                            "mono_640x192",
+                            "stereo_640x192",
+                            "mono+stereo_640x192",
+                            "mono_no_pt_640x192",
+                            "stereo_no_pt_640x192",
+                            "mono+stereo_no_pt_640x192",
+                            "mono_1024x320",
+                            "stereo_1024x320",
+                            "mono+stereo_1024x320"], default="mono+stereo_640x192")
+    parser.add_argument('--ext', type=str,
+                        help='image extension to search for in folder', default="jpg")
+    parser.add_argument("--no_cuda",
+                        help='if set, disables CUDA',
+                        action='store_true')
+
     args = parser.parse_args()
 
     net = PoseEstimationWithMobileNet()

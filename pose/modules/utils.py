@@ -21,7 +21,7 @@ class Graph():
         # each sublist should correspond to the correct body part
         self.x, self.y, self.z = self.update_coords(coords)
         self.id_p = {
-            body_parts[i]: i for i in range(body_parts)
+            body_parts[i]: i for i in range(len(body_parts))
         }
 
     def plot(self):
