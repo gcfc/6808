@@ -8,7 +8,7 @@ void tcaselect(uint8_t i) {
 }
 
 bool all_calibrated() {
-  for (int i = 0; i < 1; i++) { // TODO: i < num_sensors
+  for (int i = 0; i < num_sensors; i++) {
     if (!calibrated[i]) {
       return false;
     }

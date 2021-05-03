@@ -34,7 +34,7 @@ const int    num_buses = 2;     // currently only using SD/SC 0 and 1
 int num_sensors;
 float eul_x, eul_z;
 float phi, theta, phi_prev, theta_prev;
-float x, y, z, x_prev, y_prev, z_prev, dx, dy, dz;
+float x, y, z, dx, dy, dz;
 float phi_offset[11];   // = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float theta_offset[11]; // = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 bool calibrated[11];
@@ -84,7 +84,8 @@ void setup()
 
 void loop()
 {
-  for (uint8_t t = 0; t < 1; t++) { // TODO: i < num_sensors
+  Serial.print(micros()); Serial.print("\t");
+  for (uint8_t t = 0; t < num_sensors; t++) {
     tcaselect(t);
 
     /* Get a new sensor event */
@@ -93,7 +94,7 @@ void loop()
 
     eul_x = event.orientation.x;    // deg
     eul_z = event.orientation.z;    // deg
-    Serial.print(eul_x); Serial.print("\t"); Serial.print(eul_z); Serial.print("\t");
+//    Serial.print(eul_x); Serial.print("\t"); Serial.print(eul_z); Serial.print("\t");
 
     // angles in the rest of the code are in radians
     theta =  eul_z * pi / 180.0 - theta_offset[t];
@@ -117,21 +118,16 @@ void loop()
 
     if (all_calibrated()) {
 
-
       dx = L1 * sin(phi) * cos(theta) - L1 * sin(phi_prev) * cos(theta_prev);
       dy = L1 * sin(phi) * sin(theta) - L1 * sin(phi_prev) * sin(theta_prev);
       dz = -(L1 * cos(phi) - L1 * cos(phi_prev));
 
-//      dx = L1 * cos(theta) - L1 * cos(theta_prev);
-//      dy = L1 * sin(theta) - L1 * sin(theta_prev);
+//      Serial.print(dx); Serial.print("\t"); Serial.print(dy); Serial.print("\t"); Serial.print(dz); Serial.print("\t \t");
 
       x += dx; y += dy; z += dz;
 
       theta_prev = theta;
       phi_prev = phi;
-      x_prev = x;
-      y_prev = y;
-      z_prev = z;
 
       Serial.print(x); Serial.print("\t"); Serial.print(y); Serial.print("\t"); Serial.print(z); Serial.print("\t \t");
     }
