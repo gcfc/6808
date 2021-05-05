@@ -79,19 +79,21 @@ def main():
         #     img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
 
         # online webcam
-        # r = requests.get("http:///shot.jpg")
-        # img_arr = np.array(bytearray(r.content), dtype=np.uint8)
-        # img = cv2.imdecode(img_arr, -1)
+        r = requests.get("http:///shot.jpg")
+        img_arr = np.array(bytearray(r.content), dtype=np.uint8)
+        img = cv2.imdecode(img_arr, -1)
 
         # TODO invoke utility functions to calculate final body pose points
-        # frame_provider = [img]
-        # points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
-        # depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
+        frame_provider = [img]
+        points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
+        depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
 
-        # plot calculated points on animated 3D graph TODO make matplotlib pop up
-        # graph.update_coords(coords)
-        # graph.plot()
-        # graph.show()
+        # plot calculated points on animated 3D graph 
+        # TODO make matplotlib pop up
+        coords = points
+        graph.update_coords(coords)
+        graph.plot()
+        graph.show()
 
         # BELOW ARE ALL TEST code to display 3d graph
         # fig.canvas.draw()

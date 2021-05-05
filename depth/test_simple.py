@@ -12,6 +12,9 @@ import glob
 import argparse
 import numpy as np
 import PIL.Image as pil
+import tkinter
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib as mpl
 import matplotlib.cm as cm
 from PIL import Image
