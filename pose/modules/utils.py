@@ -16,22 +16,39 @@ body_parts = ['nose', 'neck',
 
 
 class Graph():
-    def __init__(self, ax, coords, delay):
+    def __init__(self, fig, ax, coords, delay):
+        # max length of axis
+        MAX_LENGTH = 2000
+        # instantiate plot
+        ax.set_xlim(left=0, right=MAX_LENGTH)
+        ax.set_ylim(bottom=0, top=MAX_LENGTH)
+        ax.set_zlim(bottom=-MAX_LENGTH, top=MAX_LENGTH)
+        ax.view_init(elev=90., azim=90)
+        plt.show(block=False)
+        plt.pause(0.1)
+
+        # class variables for plot
+        self.fig = fig
         self.ax = ax
+        self.coords = coords
+
         # delay: in seconds
         self.delay = delay
-        # check if a body part point is missing or not
-        self.availability = {}
+
         # coords should be a dictionary of length 3 lists/tuples
         # each list/tuple should correspond to the correct body part
         self.id_p = {
             body_parts[i]: i for i in range(len(body_parts))
         }
 
-    def plot(self):
-        self.ax.clear()
-        self.ax.scatter(self.x, self.y, self.z, s=100, label="Body Pose Position")
-        self.draw()
+        # lines in graph
+        self.lines = {}
+
+        # mapping of whether a body_id is available for a time frame
+        self.available = {i: False for i in range(len(body_parts))}
+
+        # cached background for matplotlib blit
+        self.background = fig.canvas.copy_from_bbox(fig.bbox)
 
     def draw(self):
         self.trace("nose", "neck")
@@ -53,28 +70,42 @@ class Graph():
         self.trace("l_knee", "l_ank")
 
     # coords is a dictionary pointing body_part_id to (x,y,z)
-    def update_coords(self, coords):
-        lists = []
-        for i in range(len(body_parts)):
-            if i not in coords:
-                lists.append([0, 0, 0])
-                self.availability[i] = False
-            else:
-                lists.append(coords[i])
-                self.availability[i] = True
-        lists = list(zip(*lists))
-        self.x = np.array(lists[0], dtype=np.float)
-        self.y = np.array(lists[1], dtype=np.float)
-        self.z = np.array(lists[2], dtype=np.float)
+    # deltas is a dictionary pointing body_part_id to (dx,dy,dz)
+    def update_coords(self, coords={}, deltas={}, dims=3, override=False):
+        if override:
+            for i in range(len(body_parts)):
+                self.available[i] = i in coords
+            self.coords = coords
+        else:
+            for body_id in range(len(body_parts)):
+                if not self.available[body_id]: return
+                # update x,y,z
+                for i in range(dims):
+                    self.coords[body_id][i] += deltas[body_id][i]
+
 
     def trace(self, part1, part2):
-        if not self.availability[self.id_p[part1]] or not self.availability[self.id_p[part2]]:
+        label1 = self.id_p[part1]
+        label2 = self.id_p[part2]
+        line_label = (label1, label2)
+
+        if not self.available[label1] or not self.available[label2]:
+            if line_label in self.lines:
+                self.lines[line_label].set_data_3d([0, 0], [0, 0], [0, 0])
             return
 
-        self.ax.plot3D([self.x[self.id_p[part1]], self.x[self.id_p[part2]]],
-                [self.y[self.id_p[part1]], self.y[self.id_p[part2]]],
-                [self.z[self.id_p[part1]], self.z[self.id_p[part2]]], 'b')
+        x1, y1, z1 = self.coords[label1]
+        x2, y2, z2 = self.coords[label2]
+        if line_label not in self.lines:
+            
+            (line,) = self.ax.plot3D([x1, x2], [y1, y2], [z1, z2], 'b')
+            self.lines[line_label] = line
+        else:
+            self.lines[line_label].set_data_3d([x1, x2], [y1, y2], [z1, z2])
 
-    def show(self):
-        plt.show(block=False)
-        plt.pause(self.delay)
+    def plot(self):
+        self.fig.canvas.restore_region(self.background)
+        for line in self.lines.values():
+            self.ax.draw_artist(line)
+        self.fig.canvas.blit(self.fig.bbox)
+        self.fig.canvas.flush_events()

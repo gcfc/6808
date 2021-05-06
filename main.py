@@ -51,7 +51,7 @@ from depth.test_simple import run_depth
 #                 'r_ear', 'l_ear']
 
 def main():
-    delay = 0.001
+    delay = 0.0001
 
     # variable for video camera
     cam = None
@@ -60,7 +60,7 @@ def main():
     fig = plt.figure()
     map_ax = fig.add_subplot(111, projection="3d")
     map_ax.autoscale(enable=True, axis='both', tight=True)
-    graph = Graph(ax=map_ax, coords=[], delay=delay)
+    graph = Graph(fig=fig, ax=map_ax, coords=[], delay=delay)
 
     while True:
         # TODO get data from IMUs
@@ -87,14 +87,13 @@ def main():
         frame_provider = [img]
         points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
         depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
-
+        
         # plot calculated points on animated 3D graph 
         # TODO make matplotlib pop up
         coords = points
-        graph.update_coords(coords)
+        graph.update_coords(coords, override=True)
+        graph.draw()
         graph.plot()
-        graph.show()
-
         # BELOW ARE ALL TEST code to display 3d graph
         # fig.canvas.draw()
 
