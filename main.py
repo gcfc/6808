@@ -87,23 +87,13 @@ def main():
         frame_provider = [img]
         points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
         depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
-        
+
         # plot calculated points on animated 3D graph 
         # TODO make matplotlib pop up
         coords = points
         graph.update_coords(coords, override=True)
         graph.draw()
         graph.plot()
-        # BELOW ARE ALL TEST code to display 3d graph
-        # fig.canvas.draw()
-
-        # plt_img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-        # plt_img = plt_img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
-        # plt_img = cv2.cvtColor(plt_img, cv2.COLOR_RGB2BGR)
-
-        # cv2.imshow("plot", plt_img)
-        # k = cv2.waitKey(0)
 
 
 # DO NOT EDIT THE FOLLOWING CODE, EDIT ONLY IN main()
