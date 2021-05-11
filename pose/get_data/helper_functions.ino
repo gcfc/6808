@@ -1,3 +1,15 @@
+float to_first_quad(float degree) {
+  if (90 <= degree && degree <= 180) {
+    return 180.0 - degree;
+  } else if (180 <= degree && degree <= 270) {
+    return degree - 180.0;
+  } else if (270 <= degree && degree <= 360) {
+    return 360.0 - degree;
+  } else if (degree < 0) {
+    return to_first_quad(360.0+degree);
+  }
+}
+
 
 void tcaselect(uint8_t i) {
   if (i > 7) return;
@@ -10,6 +22,15 @@ void tcaselect(uint8_t i) {
 bool all_calibrated() {
   for (int i = 0; i < num_sensors; i++) {
     if (!calibrated[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool all_validated() {
+  for (int i = 0; i < num_sensors; i++) {
+    if (!validated[i]) {
       return false;
     }
   }
