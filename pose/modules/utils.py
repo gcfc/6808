@@ -17,7 +17,7 @@ body_parts = ['nose', 'neck',
 DIMENSIONS = 3
 
 class Graph():
-    def __init__(self, fig, ax, coords, delay):
+    def __init__(self, fig, ax, coords):
         # max length of axis
         MAX_LENGTH = 2000
         # instantiate plot
@@ -32,9 +32,6 @@ class Graph():
         self.fig = fig
         self.ax = ax
         self.coords = coords
-
-        # delay: in seconds
-        self.delay = delay
 
         # coords should be a dictionary of length 3 lists/tuples
         # each list/tuple should correspond to the correct body part

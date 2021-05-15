@@ -82,7 +82,7 @@ def main():
     graph = Graph(fig=fig, ax=map_ax, coords=[])
 
     # intialize arduino
-    arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
+    # arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
 
     # initialize camera
     if args.video != '':
@@ -98,8 +98,8 @@ def main():
     
     while True:
         # get data from IMUs
-        line = arduino.readline().decode().rstrip().split()
-        imu_coords = calc_imu_coords(line)
+        # line = arduino.readline().decode().rstrip().split()
+        imu_coords = calc_imu_coords([])
 
         # pass webcam pic into analyzer to get body pose points
 
