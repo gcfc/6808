@@ -82,7 +82,7 @@ class Graph():
         else:
             deltas = self.calc_deltas(imu_coords)
             for body_id in range(len(body_parts)):
-                if not self.available[body_id]: return
+                if not self.available[body_id]: continue
                 # update x,y,z
                 for i in range(DIMENSIONS):
                     self.coords[body_id][i] += deltas[body_id][i]
