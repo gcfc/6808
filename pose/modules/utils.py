@@ -72,12 +72,13 @@ class Graph():
 
     # coords is a dictionary pointing body_part_id to (x,y,z)
     # deltas is a dictionary pointing body_part_id to (dx,dy,dz)
-    def update_coords(self, coords={}, deltas={}, override=False):
+    def update_coords(self, cv_coords={}, imu_coords={}, override=False):
         if override:
             for i in range(len(body_parts)):
-                self.available[i] = i in coords
-            self.coords = coords
+                self.available[i] = i in cv_coords
+            self.coords = cv_coords
         else:
+            deltas = self.calc_deltas(imu_coords)
             for body_id in range(len(body_parts)):
                 if not self.available[body_id]: return
                 # update x,y,z
