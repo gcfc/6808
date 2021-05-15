@@ -16,8 +16,9 @@ with open('output.csv','w') as csvfile:
 
             if 'VALIDATED!' in line:
                 writing = True
+                continue
             
-            if writing and len(line) == 7:
+            if writing:
                 line = list(map(float, line))
                 line[4] += line[1]
                 line[5] += line[2]
