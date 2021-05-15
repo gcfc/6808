@@ -79,7 +79,7 @@ def main():
     fig = plt.figure()
     map_ax = fig.add_subplot(111, projection="3d")
     map_ax.autoscale(enable=True, axis='both', tight=True)
-    graph = Graph(fig=fig, ax=map_ax, coords=[])
+    graph = Graph(fig=fig, ax=map_ax, coords={})
 
     # intialize arduino
     # arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
@@ -93,8 +93,8 @@ def main():
         img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
 
     # start asynchronous machine learning task
-    t1 = threading.Thread(target=cv_process, args=(), daemon=True)
-    t1.start()
+    # t1 = threading.Thread(target=cv_process, args=(), daemon=True)
+    # t1.start()
     
     while True:
         # get data from IMUs
@@ -102,12 +102,11 @@ def main():
         imu_coords = calc_imu_coords([])
 
         # pass webcam pic into analyzer to get body pose points
-
         # local cam
-        # was_read, img = cam.read()
-        # if not was_read or not cam.isOpened():
-        #     print("Camera is either closed or missing.")
-        #     return
+        was_read, img = cam.read()
+        if not was_read or not cam.isOpened():
+            print("Camera is either closed or missing.")
+            return
 
         # # online webcam
         r = requests.get("http:///shot.jpg")
@@ -119,7 +118,7 @@ def main():
             run_cv()
             is_ready = True
             continue
-        
+
         cv_coords = buffer.popleft() if len(buffer) else None
 
         # plot calculated points on animated 3D graph 

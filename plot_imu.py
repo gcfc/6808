@@ -5,7 +5,7 @@ N_COLS = 13
 data = [[] for _ in range(N_COLS)]
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(curr_dir,"output515-1.csv"), newline='') as csvfile:
+with open(os.path.join(curr_dir,"outputs/output515-1.csv"), newline='') as csvfile:
     r = csv.reader(csvfile, delimiter=',')
     for row in r:
         for i in range(N_COLS):

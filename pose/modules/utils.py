@@ -75,8 +75,10 @@ class Graph():
     def update_coords(self, cv_coords={}, imu_coords={}, override=False):
         if override:
             for i in range(len(body_parts)):
-                self.available[i] = i in cv_coords
-            self.coords = cv_coords
+                if i in cv_coords:
+                    self.coords[i] = cv_coords[i]
+                self.available[i] = i in self.coords
+            # self.coords = cv_coords
         else:
             deltas = self.calc_deltas(imu_coords)
             for body_id in range(len(body_parts)):
