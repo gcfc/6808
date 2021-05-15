@@ -1,5 +1,9 @@
 import argparse
 
+import signal
+import sys
+import threading
+import serial
 import cv2
 import numpy as np
 import torch
@@ -10,10 +14,11 @@ import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import requests # tmp to get img from webcam
+from collections import deque
 
 from pose.models.with_mobilenet import PoseEstimationWithMobileNet
 from pose.modules.load_state import load_state
-from pose.modules.utils import Graph
+from pose.modules.utils import Graph, calc_imu_coords
 from pose.demo import run_demo
 
 from depth.networks.resnet_encoder import ResnetEncoder
@@ -50,58 +55,89 @@ from depth.test_simple import run_depth
 #                 'r_eye', 'l_eye',
 #                 'r_ear', 'l_ear']
 
-def main():
-    delay = 0.0001
+def signal_handler(sig, frame):
+    print('You pressed Ctrl+C! Ending all threads...')
+    sys.exit(0)
 
-    # variable for video camera
-    cam = None
+def run_cv():
+    cv_coords = run_demo(net, [img], args.height_size, args.cpu, args.track, args.smooth)
+    depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, [img])
+    buffer.append(cv_coords)
+
+def cv_process():
+    while True:
+        run_cv()
+        time.sleep(timeout)
+
+def main():
+    global cam, img, buffer
+
+    # flag to see if initialization is complete
+    is_ready = False
 
     # initializing graph
     fig = plt.figure()
     map_ax = fig.add_subplot(111, projection="3d")
     map_ax.autoscale(enable=True, axis='both', tight=True)
-    graph = Graph(fig=fig, ax=map_ax, coords=[], delay=delay)
+    graph = Graph(fig=fig, ax=map_ax, coords=[])
 
+    # intialize arduino
+    arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
+
+    # initialize camera
+    if args.video != '':
+        if cam is None:
+            cam = cv2.VideoCapture(args.video)
+    else:
+        # assuming an image is provided
+        img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
+
+    # start asynchronous machine learning task
+    t1 = threading.Thread(target=cv_process, args=(), daemon=True)
+    t1.start()
+    
     while True:
-        # TODO get data from IMUs
+        # get data from IMUs
+        line = arduino.readline().decode().rstrip().split()
+        imu_coords = calc_imu_coords(line)
+
         # pass webcam pic into analyzer to get body pose points
 
         # local cam
-        # if args.video != '':
-        #     if cam is None:
-        #         cam = cv2.VideoCapture(args.video)
-        #     was_read, img = cam.read()
-        #     if not was_read or not cam.isOpened():
-        #         print("Camera is either closed or missing.")
-        #         break
-        # else:
-        #     # only analyze first image of given list of images
-        #     img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
+        # was_read, img = cam.read()
+        # if not was_read or not cam.isOpened():
+        #     print("Camera is either closed or missing.")
+        #     return
 
-        # online webcam
+        # # online webcam
         r = requests.get("http:///shot.jpg")
         img_arr = np.array(bytearray(r.content), dtype=np.uint8)
         img = cv2.imdecode(img_arr, -1)
 
-        # TODO invoke utility functions to calculate final body pose points
-        frame_provider = [img]
-        points = run_demo(net, frame_provider, args.height_size, args.cpu, args.track, args.smooth)
-        depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, frame_provider)
+        # invoke machine learning models to retrieve body pose points
+        if not is_ready:
+            run_cv()
+            is_ready = True
+            continue
+        
+        cv_coords = buffer.popleft() if len(buffer) else None
 
         # plot calculated points on animated 3D graph 
-        # TODO make matplotlib pop up
-        coords = points
-        graph.update_coords(coords, override=True)
+        graph.update_coords(cv_coords=cv_coords, imu_coords=imu_coords, override=cv_coords is not None)
         graph.draw()
         graph.plot()
 
 
 # DO NOT EDIT THE FOLLOWING CODE, EDIT ONLY IN main()
 if __name__ == '__main__':
+    # listener for ctrl + c to exit process
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # initializing par
     parser = argparse.ArgumentParser(
         description='''Team 1 Body Pose Tracking with IMUs''')
 
-    # parser for pose
+    # parser for command line arguments
     parser.add_argument('--checkpoint-path', type=str, required=True, help='path to the checkpoint')
     parser.add_argument('--height-size', type=int, default=256, help='network input layer height size')
     parser.add_argument('--video', type=str, default='', help='path to video file or camera id')
@@ -170,5 +206,18 @@ if __name__ == '__main__':
     depth_decoder.to(device)
     depth_decoder.eval()
 
+    # variable for video camera
+    cam = None
+
+    # img of latest camera frame
+    img = None
+
+    # buffer of body points shared by every thread
+    buffer = deque([])
+
+    # timeout before invoking machine learning models
+    timeout = 1
+
+    # listen if ctrl+c is invoked
     main()
 

@@ -14,6 +14,7 @@ body_parts = ['nose', 'neck',
               'r_eye', 'l_eye',
               'r_ear', 'l_ear']
 
+DIMENSIONS = 3
 
 class Graph():
     def __init__(self, fig, ax, coords, delay):
@@ -50,6 +51,9 @@ class Graph():
         # cached background for matplotlib blit
         self.background = fig.canvas.copy_from_bbox(fig.bbox)
 
+        # cache for previous imu coords
+        self.prev_imu_coords = None
+
     def draw(self):
         self.trace("nose", "neck")
 
@@ -71,7 +75,7 @@ class Graph():
 
     # coords is a dictionary pointing body_part_id to (x,y,z)
     # deltas is a dictionary pointing body_part_id to (dx,dy,dz)
-    def update_coords(self, coords={}, deltas={}, dims=3, override=False):
+    def update_coords(self, coords={}, deltas={}, override=False):
         if override:
             for i in range(len(body_parts)):
                 self.available[i] = i in coords
@@ -80,9 +84,9 @@ class Graph():
             for body_id in range(len(body_parts)):
                 if not self.available[body_id]: return
                 # update x,y,z
-                for i in range(dims):
+                for i in range(DIMENSIONS):
                     self.coords[body_id][i] += deltas[body_id][i]
-
+            # print(deltas)
 
     def trace(self, part1, part2):
         label1 = self.id_p[part1]
@@ -109,3 +113,26 @@ class Graph():
             self.ax.draw_artist(line)
         self.fig.canvas.blit(self.fig.bbox)
         self.fig.canvas.flush_events()
+
+    def get_gesture(self):
+        pass
+
+    def calc_deltas(self, imu_coords):
+        if self.prev_imu_coords is None:
+            self.prev_imu_coords = imu_coords
+            return {i:[0,0,0] for i in range(len(body_parts))}
+
+        deltas = {i: [0,0,0] for i in range(len(body_parts))}
+        for body_part_id in range(len(body_parts)):
+            # if (body_part_id in [2,3,4]): #test code line
+            for i in range(DIMENSIONS):
+                # need to multiply -1 on x-y for now because 0,0 is at top right corner
+                # length from elbow to wrist: 25 cm; shoulder to elbow: 22.5
+                px_over_m = ((945-666)**2 + (784-767)**2)**.5 / 0.225
+                deltas[body_part_id][i] = px_over_m * (imu_coords[body_part_id][i] - self.prev_imu_coords[body_part_id][i])
+        self.prev_imu_coords = imu_coords
+        return deltas
+
+# helper to calculate imu coords from arduino
+def calc_imu_coords(line):
+    return {i:[0,0,0] for i in range(len(body_parts))}
