@@ -16,10 +16,11 @@ body_parts = ['nose', 'neck',
 
 DIMENSIONS = 3
 
+# max length of axis
+MAX_LENGTH = 2000
+
 class Graph():
     def __init__(self, fig, ax, coords):
-        # max length of axis
-        MAX_LENGTH = 2000
         # instantiate plot
         ax.set_xlim(left=0, right=MAX_LENGTH)
         ax.set_ylim(bottom=0, top=MAX_LENGTH)
@@ -27,7 +28,7 @@ class Graph():
         ax.set_xlabel("X-axis")
         ax.set_ylabel("Y-axis")
         ax.set_zlabel("Z-axis")
-        ax.view_init(elev=90., azim=90)
+        ax.view_init(elev=120., azim=-90)
         plt.show(block=False)
         plt.pause(0.1)
 
@@ -80,6 +81,8 @@ class Graph():
             for i in range(len(body_parts)):
                 if i in cv_coords:
                     self.coords[i] = cv_coords[i]
+                    self.coords[i][0] = MAX_LENGTH-self.coords[i][0]
+                    self.coords[i][1] = MAX_LENGTH-self.coords[i][1]
                 self.available[i] = i in self.coords
             # self.coords = cv_coords
         else:

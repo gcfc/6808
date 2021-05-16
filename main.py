@@ -103,7 +103,6 @@ def main():
         # get data from IMUs
         try:
             line = arduino.readline().decode().rstrip().split()
-            print(line)
         except UnicodeDecodeError: continue
         except KeyboardInterrupt:   break
         if not imu_ready:
