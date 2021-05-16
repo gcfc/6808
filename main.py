@@ -60,6 +60,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def run_cv():
+    if img is None: return
     cv_coords = run_demo(net, [img], args.height_size, args.cpu, args.track, args.smooth)
     depth = run_depth(encoder, depth_decoder, feed_width, feed_height, device, [img])
     buffer.append(cv_coords)
