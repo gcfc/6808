@@ -73,8 +73,9 @@ def cv_process():
 def main():
     global cam, img, buffer
 
-    # flag to see if initialization is complete
-    is_ready = False
+    # flags to see if initialization is complete
+    imu_ready = False
+    cv_ready = False
 
     # initializing graph
     fig = plt.figure()
@@ -100,7 +101,9 @@ def main():
     while True:
         # get data from IMUs
         line = arduino.readline().decode().rstrip().split()
-        if "VALIDATED" not in line: continue
+        if not imu_ready:
+            imu_ready = "VALIDATED!" in line
+            continue
         imu_coords = calc_imu_coords(line)
 
         # pass webcam pic into analyzer to get body pose points
@@ -116,9 +119,9 @@ def main():
         # img = cv2.imdecode(img_arr, -1)
 
         # invoke machine learning models to retrieve body pose points
-        if not is_ready:
+        if not cv_ready:
             run_cv()
-            is_ready = True
+            cv_ready = True
             continue
 
         cv_coords = buffer.popleft() if len(buffer) else None
