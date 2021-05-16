@@ -99,6 +99,7 @@ def main():
     while True:
         # get data from IMUs
         line = arduino.readline().decode().rstrip().split()
+        if "VALIDATED" not in line: continue
         imu_coords = calc_imu_coords(line)
 
         # pass webcam pic into analyzer to get body pose points
