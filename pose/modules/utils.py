@@ -138,6 +138,7 @@ class Graph():
 
 # helper to calculate imu coords from arduino
 def calc_imu_coords(line):
+    line = list(map(float, line))
     return {
         2: [0,0,0],
         3: [-line[2], -line[1], line[3]],

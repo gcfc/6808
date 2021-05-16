@@ -89,7 +89,7 @@ def main():
     # initialize camera
     if args.video != '':
         if cam is None:
-            cam = cv2.VideoCapture(args.video)
+            cam = cv2.VideoCapture(int(args.video))
     else:
         # assuming an image is provided
         img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
@@ -100,7 +100,11 @@ def main():
     
     while True:
         # get data from IMUs
-        line = arduino.readline().decode().rstrip().split()
+        try:
+            line = arduino.readline().decode().rstrip().split()
+            print(line)
+        except UnicodeDecodeError: continue
+        except KeyboardInterrupt:   break
         if not imu_ready:
             imu_ready = "VALIDATED!" in line
             continue
@@ -109,6 +113,7 @@ def main():
         # pass webcam pic into analyzer to get body pose points
         # local cam
         was_read, img = cam.read()
+        img.show()
         if not was_read or not cam.isOpened():
             print("Camera is either closed or missing.")
             return
