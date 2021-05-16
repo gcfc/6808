@@ -89,7 +89,8 @@ def main():
     # initialize camera
     if args.video != '':
         if cam is None:
-            cam = cv2.VideoCapture(int(args.video))
+            args.video = int(args.video) if args.video.isnumeric() else args.video
+            cam = cv2.VideoCapture(args.video)
     else:
         # assuming an image is provided
         img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
@@ -113,12 +114,11 @@ def main():
         # pass webcam pic into analyzer to get body pose points
         # local cam
         was_read, img = cam.read()
-        img.show()
         if not was_read or not cam.isOpened():
             print("Camera is either closed or missing.")
             return
 
-        # # online webcam
+        # online webcam
         # r = requests.get("http:///shot.jpg")
         # img_arr = np.array(bytearray(r.content), dtype=np.uint8)
         # img = cv2.imdecode(img_arr, -1)
