@@ -127,15 +127,19 @@ class Graph():
 
         deltas = {i: [0,0,0] for i in range(len(body_parts))}
         for body_part_id in range(len(body_parts)):
-            # if (body_part_id in [2,3,4]): #test code line
-            for i in range(DIMENSIONS):
-                # need to multiply -1 on x-y for now because 0,0 is at top right corner
-                # length from elbow to wrist: 25 cm; shoulder to elbow: 22.5
-                px_over_m = ((945-666)**2 + (784-767)**2)**.5 / 0.225
-                deltas[body_part_id][i] = px_over_m * (imu_coords[body_part_id][i] - self.prev_imu_coords[body_part_id][i])
+            if (body_part_id in [2,3,4]): # only doing arm temporarily
+                for i in range(DIMENSIONS):
+                    # need to multiply -1 on x-y for now because 0,0 is at top right corner
+                    # length from elbow to wrist: 25 cm; shoulder to elbow: 22.5
+                    px_over_m = ((945-666)**2 + (784-767)**2)**.5 / 0.225
+                    deltas[body_part_id][i] = px_over_m * (imu_coords[body_part_id][i] - self.prev_imu_coords[body_part_id][i])
         self.prev_imu_coords = imu_coords
         return deltas
 
 # helper to calculate imu coords from arduino
 def calc_imu_coords(line):
-    return {i:[0,0,0] for i in range(len(body_parts))}
+    return {
+        2: [0,0,0],
+        3: [-line[2], -line[1], line[3]],
+        4: [-line[8] - line[2], -line[7] - line[1], line[9]]
+    }

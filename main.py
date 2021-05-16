@@ -82,7 +82,7 @@ def main():
     graph = Graph(fig=fig, ax=map_ax, coords={})
 
     # intialize arduino
-    # arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
+    arduino = serial.Serial(port='COM8', baudrate=115200, timeout=.1)
 
     # initialize camera
     if args.video != '':
@@ -93,13 +93,13 @@ def main():
         img = cv2.imread(args.images[0], cv2.IMREAD_COLOR)
 
     # start asynchronous machine learning task
-    # t1 = threading.Thread(target=cv_process, args=(), daemon=True)
-    # t1.start()
+    t1 = threading.Thread(target=cv_process, args=(), daemon=True)
+    t1.start()
     
     while True:
         # get data from IMUs
-        # line = arduino.readline().decode().rstrip().split()
-        imu_coords = calc_imu_coords([])
+        line = arduino.readline().decode().rstrip().split()
+        imu_coords = calc_imu_coords(line)
 
         # pass webcam pic into analyzer to get body pose points
         # local cam
@@ -109,9 +109,9 @@ def main():
             return
 
         # # online webcam
-        r = requests.get("http:///shot.jpg")
-        img_arr = np.array(bytearray(r.content), dtype=np.uint8)
-        img = cv2.imdecode(img_arr, -1)
+        # r = requests.get("http:///shot.jpg")
+        # img_arr = np.array(bytearray(r.content), dtype=np.uint8)
+        # img = cv2.imdecode(img_arr, -1)
 
         # invoke machine learning models to retrieve body pose points
         if not is_ready:
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     buffer = deque([])
 
     # timeout before invoking machine learning models
-    timeout = 1
+    timeout = 0.1
 
     # listen if ctrl+c is invoked
     main()
