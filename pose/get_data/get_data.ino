@@ -79,14 +79,14 @@ void setup()
   Serial.println("Orientation Sensor Test begins...");
 
   for (uint8_t t = 0; t < num_buses; t++) {
-
-    int i = t + 2;
-    if (t == 0) {
-      i = t;
-    }
-    else if (t == 1) {
-      i = t + 1;
-    }
+    int i = t;
+//    int i = t + 2;
+//    if (t == 0) {
+//      i = t;
+//    }
+//    else if (t == 1) {
+//      i = t + 1;
+//    }
 
     tcaselect(t);
     /* Initialise the sensor */
@@ -98,17 +98,17 @@ void setup()
     }
     Serial.print("Orientation Sensor Test complete: "); Serial.println(i);
 
-    if (t == 0 || t == 1) {
-      i++;
-      /* Initialise the sensor */
-      if (!bno2.begin())
-      {
-        /* There was a problem detecting the BNO055 ... check your connections */
-        Serial.print("Ooops, no BNO055 at 0x29 detected ... Check your wiring or I2C ADDR at 0x29!");
-        while (1);
-      }
-      Serial.print("Orientation Sensor Test complete: "); Serial.println(i);
-    }
+//    if (t == 0 || t == 1) {
+//      i++;
+//      /* Initialise the sensor */
+//      if (!bno2.begin())
+//      {
+//        /* There was a problem detecting the BNO055 ... check your connections */
+//        Serial.print("Ooops, no BNO055 at 0x29 detected ... Check your wiring or I2C ADDR at 0x29!");
+//        while (1);
+//      }
+//      Serial.print("Orientation Sensor Test complete: "); Serial.println(i);
+//    }
   }
   delay(1000);
 
@@ -122,20 +122,21 @@ void loop()
     tcaselect(b);
 
     // internal variables: b - buses, i - sensors
-    int i = b + 2;
-    if (b == 0) {
-      i = b;
-    }
-    else if (b == 1) {
-      i = b + 1;
-    }
+//    int i = b + 2;
+//    if (b == 0) {
+//      i = b;
+//    }
+//    else if (b == 1) {
+//      i = b + 1;
+//    }
 
-    sensorOperations(&bno, i);
+//    sensorOperations(&bno, i);
+    sensorOperations(&bno, b);
 
-    if (b == 0 || b == 1) {
-      i++;
-      sensorOperations(&bno2, i);
-    }
+//    if (b == 0 || b == 1) {
+//      i++;
+//      sensorOperations(&bno2, i);
+//    }
 
   }
   Serial.println();
