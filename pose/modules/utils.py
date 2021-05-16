@@ -141,5 +141,5 @@ def calc_imu_coords(line):
     return {
         2: [0,0,0],
         3: [-line[2], -line[1], line[3]],
-        4: [-line[5], -line[4], line[6]]
+        4: [-line[5] - line[2], -line[4] - line[1], line[6]]
     }
